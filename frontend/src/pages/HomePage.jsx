@@ -7,8 +7,7 @@ import TaskListPagination from "@/components/TaskListPagination";
 import DateTimeFilter from "@/components/DateTimeFilter";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
-import axios from "axios";
-
+import api from "@/lib/axios";
 const Homepage = () => {
   const [taskBuffer, setTaskBuffer] = useState([]);
   const [activeTasksCount, setActiveTasksCount] = useState(0);
@@ -21,7 +20,7 @@ const Homepage = () => {
   //Lay data tasks tu backend
   const fetchTask = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/tasks");
+      const res = await api.get("/tasks");
       setTaskBuffer(res.data.tasks);
       setActiveTasksCount(res.data.activeCount);
       setCompleteTasksCount(res.data.completeCount);
@@ -35,16 +34,19 @@ const Homepage = () => {
     }
   };
   //loc danh sach nhiem vu theo trang thai
-  const filteredTasks = taskBuffer.filter((task)=>{
-    switch(filter){
-      case 'active':
-        return task.status==='active'
-      case 'complete':
-         return task.status==='complete'
+  const filteredTasks = taskBuffer.filter((task) => {
+    switch (filter) {
+      case "active":
+        return task.status === "active";
+      case "complete":
+        return task.status === "complete";
       default:
-        return true
+        return true;
     }
-  })
+  });
+  const handleTaskChanged = () => {
+    fetchTask();
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#fefcff] relative">
@@ -63,7 +65,7 @@ const Homepage = () => {
           {/* Header */}
           <Header />
           {/* Tao nhiem vu */}
-          <AddTask />
+          <AddTask handleNewTaskAdded={handleTaskChanged} />
           {/* Thong ke va bo loc */}
           <StatsAndFilters
             filter={filter}
@@ -72,7 +74,7 @@ const Homepage = () => {
             completedTasksCount={completeTasksCount}
           />
           {/* Danh sach nhiem vu */}
-          <TaskList filteredTasks={filteredTasks} filter={filter}/>
+          <TaskList filteredTasks={filteredTasks} filter={filter} handleTaskChanged={handleTaskChanged}/>
           {/* Phan trang va loc theo Date */}
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <TaskListPagination />
